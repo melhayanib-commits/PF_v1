@@ -86,7 +86,7 @@ try {
   }
 
   const browser = await chromium.launch({ args: ['--no-sandbox', '--use-gl=swiftshader'] });
-  const page = await browser.newPage({ viewport: { width: 1024, height: 720 } });
+  const page = await browser.newPage({ viewport: { width: 480, height: 360 } });
   const jsErrors = [];
   page.on('pageerror', (e) => jsErrors.push(e.message));
 
@@ -115,6 +115,14 @@ try {
   check('PRUEBA 1: Naruto és visible renderitzat a la càmera en 3a persona',
     p1.orangePct > 1.0, `taronja=${p1.orangePct}% del centre`);
 
+  // Mesura de FPS reals de l'entorn de prova (renderitzat per software)
+  const fps = await page.evaluate(() => new Promise((res) => {
+    let n = 0; const t = performance.now();
+    const tick = () => { n++; if (performance.now() - t < 1000) requestAnimationFrame(tick); else res(n); };
+    requestAnimationFrame(tick);
+  }));
+  console.log(`  [info] FPS mesurats a l'entorn de prova: ${fps}`);
+
   // PRUEBA 2: moviment amb W
   await hold(page, ['KeyW'], 1300);
   await sleep(200);
@@ -124,7 +132,15 @@ try {
     `r ${p1.r}->${p2.r} / b ${p1.b}->${p2.b}`);
 
   // PRUEBA 2: córrer fins al final de la sala perquè avanci a la sala 2
-  await hold(page, ['ShiftLeft', 'KeyW'], 9000);
+  await page.keyboard.down('ShiftLeft');
+  await page.keyboard.down('KeyW');
+  for (let i = 0; i < 30; i++) {
+    await sleep(1000);
+    st = await state(page);
+    if (st.room !== '1' || st.choice === 'flex') break;
+  }
+  await page.keyboard.up('KeyW');
+  await page.keyboard.up('ShiftLeft');
   await sleep(400);
   st = await state(page);
   check('PRUEBA 2: s\'avança de la sala 1 a la sala 2', st.room === '2', `sala=${st.room} msg="${st.msg}"`);
@@ -134,7 +150,15 @@ try {
   for (let attempt = 0; attempt < 3 && !answeredWrong; attempt++) {
     st = await state(page);
     if (st.choice !== 'flex') {
-      await hold(page, ['ShiftLeft', 'KeyW'], 7000);
+      await page.keyboard.down('ShiftLeft');
+      await page.keyboard.down('KeyW');
+      for (let i = 0; i < 20; i++) {
+        await sleep(1000);
+        st = await state(page);
+        if (st.choice === 'flex') break;
+      }
+      await page.keyboard.up('KeyW');
+      await page.keyboard.up('ShiftLeft');
       await sleep(500);
       st = await state(page);
     }
