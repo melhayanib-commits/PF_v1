@@ -65,21 +65,32 @@ async function loadRiggedModel(target,assetPath,desiredHeight,kind){
   model.traverse(obj=>{if(obj.isMesh){obj.castShadow=true;obj.receiveShadow=true;const mats=Array.isArray(obj.material)?obj.material:[obj.material];mats.forEach(m=>{if(m){if('roughness' in m)m.roughness=Math.max(.45,m.roughness??.8);if('metalness' in m)m.metalness=Math.min(.25,m.metalness??0);m.needsUpdate=true;}})}});
   target.clear();target.add(model);target.userData.imported=true;target.userData.model=model;target.userData.loadError=null;target.userData.limbs=[];target.userData.cape={rotation:{x:0}};
   const clip=gltf.animations?.[0];if(clip){const mixer=new THREE.AnimationMixer(model);const action=mixer.clipAction(clip);action.enabled=true;action.setEffectiveWeight(1);action.play();action.paused=(kind==='player');target.userData.mixer=mixer;target.userData.action=action;if(kind==='player'){playerMixer=mixer;playerAction=action;}else{monsterMixer=mixer;monsterAction=action;}}
+  // Verificació real: malla present, model dins de l'escena i animació engegada.
+  let meshes=0;model.traverse(o=>{if(o.isMesh)meshes++});
+  if(!meshes)throw new Error('El model s’ha descarregat però no conté cap malla visible.');
+  if(!target.parent)throw new Error('El personatge no s’ha pogut afegir a l’escena.');
+  const inScene=scene&&scene.getObjectById(target.id)===target;
+  if(!inScene)throw new Error('El personatge no forma part de l’escena 3D.');
+  target.userData.meshes=meshes;
+  target.userData.animations=(gltf.animations||[]).map(a=>a.name);
   target.visible=kind==='player'||(kind==='monster'&&monsterActive);
-  console.info(`${label} carregat`,url,'animacions:',gltf.animations?.length||0);
+  console.info(`${label} carregat`,url,`malles:${meshes}`,'animacions:',target.userData.animations.length,target.userData.animations.join(', '));
   return true;
  }catch(err){
-  target.visible=false;target.userData.imported=false;target.userData.loadError=String(err?.message||err);
+  target.visible=false;target.userData.imported=false;target.userData.meshes=0;
+  target.userData.loadError=String(err?.message||err);
   console.error(`Error carregant ${label}:`,url,err);
-  message(`No s’ha pogut carregar ${label}: ${err?.message||'comprova la ruta del model'}`,0);
   return false;
  }
+}
+function modelsInScene(){
+ return !!(player&&monster&&player.userData.imported&&monster.userData.imported&&player.userData.meshes>0&&monster.userData.meshes>0&&scene&&scene.getObjectById(player.id)===player&&scene.getObjectById(monster.id)===monster);
 }
 function makeMonster(){const g=new THREE.Group();g.visible=false;g.userData={limbs:[]};scene.add(g);return g}
 function playTone(freq=440,duration=.12,type='sine',gain=.035){try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch{}}
 let messageTimer=0;function message(s,duration=3200){const e=$('#anom-message');if(!e)return;e.textContent=s;e.classList.remove('anom-message-hide');e.style.opacity='1';clearTimeout(messageTimer);if(duration>0)messageTimer=setTimeout(()=>{e.style.opacity='0';},duration)}
 function setChoice(open){decisionOpen=open;$('#anom-choices').style.display=open?'flex':'none'}
-function start(){if(!player?.userData.imported||!monster?.userData.imported){message('Els personatges encara no estan preparats. Torna-ho a provar quan acabi la càrrega.',0);return;}started=true;gameOver=false;paused=false;room=0;score=0;lastDecision=-1;monsterActive=false;alarmActive=false;monsterDoorBreak=null;monsterDoorBreakAt=0;scene.fog.color.set('#090e16');scene.background.set('#090e16');scene.traverse(o=>{if(o.isPointLight&&o.userData.normalIntensity!==undefined){o.color.set('#dce8ff');o.intensity=o.userData.normalIntensity}});monster.visible=false;keys.clear();if(playerAction){playerAction.reset();playerAction.play();playerAction.paused=true}if(monsterAction){monsterAction.reset();monsterAction.play();}moveVec={x:0,y:0};velY=0;onGround=true;player.position.set(0,0,7);camYaw=0;camPitch=.12;$('#anom-room').textContent='1';$('#anom-score').textContent='0';roomData.forEach(d=>{if(d.door){d.door.position.y=1.7;d.door.position.x=0;d.door.rotation.z=0;d.door.userData.closed=false;d.door.userData.monsterCanPass=false;}});$('#anom-overlay').style.display='none';setChoice(false);message('Sala 1: observa i memoritza els detalls.',2600);clock.start()}
+function start(){if(!modelsInScene()){message('Els personatges encara no estan preparats. Torna-ho a provar quan acabi la càrrega.',4000);return;}started=true;gameOver=false;paused=false;room=0;score=0;lastDecision=-1;monsterActive=false;alarmActive=false;monsterDoorBreak=null;monsterDoorBreakAt=0;scene.fog.color.set('#090e16');scene.background.set('#090e16');scene.traverse(o=>{if(o.isPointLight&&o.userData.normalIntensity!==undefined){o.color.set('#dce8ff');o.intensity=o.userData.normalIntensity}});monster.visible=false;keys.clear();if(playerAction){playerAction.reset();playerAction.play();playerAction.paused=true}if(monsterAction){monsterAction.reset();monsterAction.play();}moveVec={x:0,y:0};velY=0;onGround=true;player.position.set(0,0,7);camYaw=0;camPitch=.12;$('#anom-room').textContent='1';$('#anom-score').textContent='0';roomData.forEach(d=>{if(d.door){d.door.position.y=1.7;d.door.position.x=0;d.door.rotation.z=0;d.door.userData.closed=false;d.door.userData.monsterCanPass=false;}});$('#anom-overlay').style.display='none';setChoice(false);message('Sala 1: observa i memoritza els detalls.',2600);clock.start()}
 function buildAllRooms(){// Five connected versions of the same station layout, each with a fresh random state.
  for(let i=0;i<5;i++)buildRoom(i)}
 function anomalyExplanation(d){const details=['El cartell de la paret tenia una marca vermella que no apareixia a la sala anterior.','El banc de la dreta havia canviat de color: ara tenia una franja vermellosa.','La paperera metàl·lica de la dreta era diferent de la de la sala anterior.','La lluminària del sostre tenia una llum blavosa que abans no hi era.'];return d.anomaly?details[d.kind]:'No hi havia cap canvi: els cartells, els bancs, la paperera i la il·luminació eren iguals que a la sala anterior.'}
@@ -114,27 +125,38 @@ function boot(){const menu=$('#game-menu'),container=$('#game-container');menu.c
  async function loadCharacters(){
   const button=$('#anom-start');button.disabled=true;button.textContent='CARREGANT PERSONATGES…';
   player.userData.imported=false;monster.userData.imported=false;player.visible=false;monster.visible=false;
+  message('Descarregant Naruto…',0);
   modelsReady=Promise.all([
    loadRiggedModel(player,'assets/characters/naruto_low_poly_rigged.glb',2.05,'player'),
    loadRiggedModel(monster,'assets/characters/terrifying_hooded_horror_woman.glb',3.5,'monster')
   ]);
   const results=await modelsReady;
   if(!active)return;
-  const ready=results.every(Boolean);
+  // Només es permet començar si tots dos models són realment a l'escena.
+  const ready=results.every(Boolean)&&modelsInScene();
   button.disabled=false;
   button.textContent=ready?'COMENÇAR':'TORNAR A CARREGAR PERSONATGES';
-  if(ready)message('Naruto i Terrifying estan preparats.',2600);
-  else {
+  if(ready){
+   console.info('Personatges preparats:',{naruto:player.userData.meshes,terrifying:monster.userData.meshes,anims:{naruto:player.userData.animations,terrifying:monster.userData.animations}});
+   message('Naruto i Terrifying estan preparats.',2600);
+   const hint=$('#anom-model-error');if(hint)hint.remove();
+  }else{
    const errors=[player.userData.loadError&&`Naruto: ${player.userData.loadError}`,monster.userData.loadError&&`Terrifying: ${monster.userData.loadError}`].filter(Boolean).join(' · ');
-   message(errors||'No s’han pogut carregar els personatges. Revisa assets/characters.',0);
-   console.error('Errors de càrrega dels personatges:',errors);
+   const detail=errors||'Els models no han quedat afegits a l’escena.';
+   console.error('Errors de càrrega dels personatges:',detail);
+   message('No s’han pogut carregar els personatges. Toca «TORNAR A CARREGAR PERSONATGES».',8000);
+   const box=document.createElement('div');
+   box.id='anom-model-error';
+   box.style.cssText='position:absolute;left:50%;top:12%;transform:translateX(-50%);max-width:min(560px,92%);padding:12px 16px;border-radius:12px;background:rgba(70,10,14,.94);border:1px solid #ff4d5a;color:#ffdfe2;font-size:13px;line-height:1.45;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+   box.innerHTML='<b style="display:block;margin-bottom:6px;color:#fff">No s’han pogut carregar els personatges</b>'+detail.replace(/</g,'&lt;');
+   root.appendChild(box);
   }
  }
  // Pointer look; drag on canvas (desktop and mobile)
  let lookPointer=null,lastX=0,lastY=0;const canvas=renderer.domElement;canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;lookPointer=e.pointerId;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture?.(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(lookPointer!==e.pointerId||decisionOpen||!started)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;camYaw-=dx*.004;camPitch=Math.max(-.15,Math.min(.65,camPitch+dy*.003));});const endLook=e=>{if(lookPointer===e.pointerId)lookPointer=null};canvas.addEventListener('pointerup',endLook);canvas.addEventListener('pointercancel',endLook);
  const joy=$('#anom-joy'),knob=$('#anom-knob');let joyId=null;function joyMove(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,l=Math.hypot(dx,dy),max=38;if(l>max){dx=dx/l*max;dy=dy/l*max}moveVec.x=dx/max;moveVec.y=-dy/max;knob.style.transform=`translate(${dx}px,${dy}px)`}function joyEnd(){joyId=null;moveVec={x:0,y:0};knob.style.transform=''}joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture?.(e.pointerId);joyMove(e)});joy.addEventListener('pointermove',e=>{if(joyId===e.pointerId)joyMove(e)});joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
  const hold=(id,key)=>{const el=$('#'+id);el.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(key)});['pointerup','pointercancel','pointerleave'].forEach(ev=>el.addEventListener(ev,()=>keys.delete(key)))};hold('anom-sprint','shift');hold('anom-jump',' ');$('#anom-interact').onclick=()=>{if(started&&!decisionOpen){const d=roomData[room];if(room===0)message('Sala 1: observa els detalls. La primera pregunta apareixerà a la sala 2.');else if(d&&Math.abs(player.position.z-(d.z+2))<8)showDecision();else message('Acosta’t a la porta del final de la sala per decidir.')}};
- $('#anom-changes').onclick=()=>resolveChoice(true);$('#anom-same').onclick=()=>resolveChoice(false);$('#anom-start').onclick=()=>{if($('#anom-start').disabled)return;if(player?.userData.imported&&monster?.userData.imported)start();else loadCharacters();};$('#anom-back').onclick=()=>{teardown();clearTimeout(messageTimer);$('#anom-game')?.remove();$('#game-canvas-wrap')?.classList.remove('hidden');container.classList.add('hidden');menu.classList.remove('hidden')};$('#anom-exit').onclick=()=>{$('#anom-back').click()};$('#anom-pause').onclick=()=>{if(!started||gameOver)return;paused=!paused;message(paused?'Pausa · prem de nou per continuar':'Continua explorant');$('#anom-pause').textContent=paused?'▶ CONTINUAR':'Ⅱ PAUSA'};$('#anom-full').onclick=()=>{if(!document.fullscreenElement){const r=root.requestFullscreen?.();if(r&&r.catch)r.catch(()=>message('La pantalla completa no està disponible en aquest navegador.'))}else document.exitFullscreen?.()};
+ $('#anom-changes').onclick=()=>resolveChoice(true);$('#anom-same').onclick=()=>resolveChoice(false);$('#anom-start').onclick=()=>{if($('#anom-start').disabled)return;if(modelsInScene())start();else loadCharacters();};$('#anom-back').onclick=()=>{teardown();clearTimeout(messageTimer);$('#anom-game')?.remove();$('#game-canvas-wrap')?.classList.remove('hidden');container.classList.add('hidden');menu.classList.remove('hidden')};$('#anom-exit').onclick=()=>{$('#anom-back').click()};$('#anom-pause').onclick=()=>{if(!started||gameOver)return;paused=!paused;message(paused?'Pausa · prem de nou per continuar':'Continua explorant');$('#anom-pause').textContent=paused?'▶ CONTINUAR':'Ⅱ PAUSA'};$('#anom-full').onclick=()=>{if(!document.fullscreenElement){const r=root.requestFullscreen?.();if(r&&r.catch)r.catch(()=>message('La pantalla completa no està disponible en aquest navegador.'))}else document.exitFullscreen?.()};
  const kd=e=>{if(!active)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if(e.key==='Escape'){if(started&&!gameOver){paused=!paused;message(paused?'Pausa':'Continua explorant')}return}if(e.key.toLowerCase()==='e'&&started&&!decisionOpen){const d=roomData[room];if(room>0&&d&&Math.abs(player.position.z-(d.z+2))<8)showDecision()}keys.add(e.key===' ' ? ' ' : e.key.toLowerCase())};const ku=e=>keys.delete(e.key===' '?' ':e.key.toLowerCase());window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);cleanup.push(()=>window.removeEventListener('keydown',kd),()=>window.removeEventListener('keyup',ku));
  active=true;const ro=new ResizeObserver(()=>{if(!active)return;camera.aspect=root.clientWidth/root.clientHeight;camera.updateProjectionMatrix();renderer.setSize(root.clientWidth,root.clientHeight)});ro.observe(root);cleanup.push(()=>ro.disconnect());
  function loop(){if(!active)return;raf=requestAnimationFrame(loop);const dt=Math.min(clock.getDelta()||.016,.04);if(alarmActive){const pulse=1.45+Math.abs(Math.sin(performance.now()*.009))*.9;scene.traverse(o=>{if(o.isPointLight&&o.color.r>.7)o.intensity=pulse});}if(started&&!paused&&!gameOver&&!decisionOpen){const f=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0)+moveVec.y;const s=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0)+moveVec.x;const mag=Math.hypot(f,s);const speed=(keys.has('shift')?6.8:3.4);if(mag>.08){if(playerAction){playerAction.paused=false;playerAction.timeScale=1}const n=Math.min(1,mag),dx=(Math.sin(camYaw)*f+Math.cos(camYaw)*s)/Math.max(1,mag)*speed*dt*n,dz=(-Math.cos(camYaw)*f+Math.sin(camYaw)*s)/Math.max(1,mag)*speed*dt*n;player.position.x+=dx;player.position.z+=dz;player.rotation.y=Math.atan2(dx,-dz);(player.userData.limbs||[]).forEach((limb,i)=>{limb.rotation.x=Math.sin(performance.now()*.012+i*Math.PI)*.55});if(player.userData.cape)player.userData.cape.rotation.x=Math.sin(performance.now()*.008)*.06;if(player.userData.model)player.userData.model.rotation.z=Math.sin(performance.now()*.012)*.025}else{(player.userData.limbs||[]).forEach(l=>l.rotation.x*=.8);if(playerAction){playerAction.paused=true}}if(playerMixer)playerMixer.update(dt);
