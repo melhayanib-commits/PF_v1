@@ -54,7 +54,7 @@ Al fitxer `.env`:
 
 ```env
 OPENAI_API_KEY=la_teva_clau
-OPENAI_MODEL=gpt-5.5
+OPENAI_MODEL=gpt-4.1-mini
 PORT=3000
 ALLOWED_ORIGINS=http://localhost:3000
 SERVE_FRONTEND=false
@@ -240,13 +240,13 @@ La escena `world3d.js` incluye tres retos activados al acercarse a sus portales:
 
 ### FocusIA: comprobación real del backend
 
-El endpoint `GET /api/health` informa `ok` y `configured`; `configured: false` significa que falta `OPENAI_API_KEY` en el entorno del servidor. La clave debe guardarse únicamente en el entorno privado del backend, nunca en JavaScript del navegador. `POST /api/focusia` necesita un modelo compatible configurado mediante `OPENAI_MODEL` (el valor predeterminado actual es `gpt-5.5`). Una respuesta HTTP 503 indica que no hay clave configurada; 429 suele indicar límite/cuota; 400 indica que la petición no se ha podido procesar. La disponibilidad final depende de la clave, los permisos de API, el modelo y el despliegue.
+El endpoint `GET /api/health` informa `ok` y `configured`; `configured: false` significa que falta `OPENAI_API_KEY` en el entorno del servidor. La clave debe guardarse únicamente en el entorno privado del backend, nunca en JavaScript del navegador. `POST /api/focusia` necesita un modelo compatible configurado mediante `OPENAI_MODEL` (el valor predeterminado actual es `gpt-4.1-mini`). Una respuesta HTTP 503 indica que no hay clave configurada; 429 suele indicar límite/cuota; 400 indica que la petición no se ha podido procesar. La disponibilidad final depende de la clave, los permisos de API, el modelo y el despliegue.
 
 ## Món obert: Observació (mode 3D)
 
-El menú de jocs incorpora el mode **Món obert: Observació**, un joc de tercera persona amb cinc sales connectades d'una estació de metro. Cal observar els cartells, els seients, els elements de les parets i la il·luminació, i respondre amb **CAMBIOS** o **SIN CAMBIOS**. Una resposta incorrecta activa una criatura perseguidora. Inclou controls WASD/fletxes, ratolí per girar la càmera, Shift per córrer, Espai per saltar, E/interactuar, joystick tàctil, pausa i pantalla completa. Three.js es carrega sota demanda des d'un CDN quan s'inicia aquest mode; cal connexió a internet per carregar la biblioteca.
+El menú de jocs incorpora el mode **Món obert: Observació**, un joc de tercera persona amb cinc sales connectades d'una estació de metro. Cal observar els cartells, els seients, els elements de les parets i la il·luminació, i respondre amb **CAMBIOS** o **SIN CAMBIOS**. Una resposta incorrecta activa una criatura perseguidora. Inclou controls WASD/fletxes, ratolí per girar la càmera, Shift per córrer, Espai per saltar, E/interactuar, joystick tàctil, pausa i pantalla completa. Three.js i GLTFLoader es carreguen sota demanda des de `vendor/three/`, dins del propi projecte: no cal cap CDN ni cap connexió externa per carregar la biblioteca.
 
-Per validar els fitxers JavaScript i els elements principals, executa `node tests/static-check.mjs`.
+Per validar els fitxers JavaScript i els elements principals, executa `npm test` (o `node tests/static-check.mjs`).
 
 
 ### Personajes 3D animados
