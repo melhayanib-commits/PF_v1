@@ -65,6 +65,14 @@ const state = (page) => page.evaluate(() => ({
   overlay: getComputedStyle(document.querySelector('#anom-overlay')).display,
 }));
 
+// Clic directe al DOM: el HUD del joc pot quedar fora de l'àrea visible.
+const tap = (page, sel) => page.evaluate((s) => {
+  const el = document.querySelector(s);
+  if (!el) throw new Error('No existeix ' + s);
+  el.click();
+  return true;
+}, sel);
+
 const hold = async (page, keys, ms) => {
   for (const k of keys) await page.keyboard.down(k);
   await sleep(ms);
@@ -78,14 +86,14 @@ try {
   }
 
   const browser = await chromium.launch({ args: ['--no-sandbox', '--use-gl=swiftshader'] });
-  const page = await browser.newPage({ viewport: { width: 640, height: 480 } });
+  const page = await browser.newPage({ viewport: { width: 1024, height: 720 } });
   const jsErrors = [];
   page.on('pageerror', (e) => jsErrors.push(e.message));
 
   await page.goto(BASE, { waitUntil: 'domcontentloaded' });
-  await page.click('.nav-link[data-route="juegos"]');
-  await page.click('button[data-mode="anomaly"]');
-  await page.click('#launch-game');
+  await tap(page, '.nav-link[data-route="juegos"]');
+  await tap(page, 'button[data-mode="anomaly"]');
+  await tap(page, '#launch-game');
   await page.waitForSelector('#anom-start');
 
   const t0 = Date.now();
@@ -97,7 +105,7 @@ try {
   check('PRUEBA 1: Naruto i Terrifying carreguen (botó COMENÇAR actiu)',
     /COMENÇAR/.test((await page.textContent('#anom-start')).trim()), `${loadMs} ms`);
 
-  await page.click('#anom-start');
+  await tap(page, '#anom-start');
   await sleep(1600);
   let st = await state(page);
   check('PRUEBA 2: partida iniciada a la sala 1', st.overlay === 'none' && st.room === '1');
@@ -134,7 +142,7 @@ try {
     if (st.choice !== 'flex') break;
 
     const before = st.score;
-    await page.click('#anom-same');
+    await tap(page, '#anom-same');
     await sleep(1000);
     st = await state(page);
     if (/incorrecta|alarma/i.test(st.msg) || st.score === before) {
@@ -176,7 +184,7 @@ try {
   check('Sense errors JavaScript a la pàgina', jsErrors.length === 0, jsErrors.join(' | ').slice(0, 200));
 
   // PRUEBA 7: sortir i reobrir l'estació sense pantalla negra
-  await page.click('#anom-exit');
+  await tap(page, '#anom-exit');
   await sleep(600);
   const afterExit = await page.evaluate(() => ({
     menu: !document.querySelector('#game-menu').classList.contains('hidden'),
@@ -184,8 +192,8 @@ try {
   }));
   check('PRUEBA 7: sortir neteja l\'escena 3D i torna al menú', afterExit.menu && !afterExit.leftover);
 
-  await page.click('button[data-mode="anomaly"]');
-  await page.click('#launch-game');
+  await tap(page, 'button[data-mode="anomaly"]');
+  await tap(page, '#launch-game');
   await page.waitForSelector('#anom-start');
   await page.waitForFunction(
     () => { const b = document.querySelector('#anom-start'); return b && !b.disabled; },
