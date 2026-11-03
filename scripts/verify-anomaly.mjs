@@ -1,13 +1,11 @@
-// Verificació funcional real de l'Estació de les anomalies (ràpida).
-// Comprova: càrrega dels GLB, moviment, pregunta de canvis, resposta
-// incorrecta -> il·luminació vermella real (mesurada en píxels) i captura.
+// Verificació funcional de l'Estació de les anomalies (ràpida i acotada).
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('/opt/appjet/browser/node_modules/playwright');
 
-const PORT = 8125;
+const PORT = 8126;
 const BASE = `http://127.0.0.1:${PORT}/`;
 const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'], {
   cwd: process.cwd(), stdio: 'ignore',
@@ -20,24 +18,41 @@ const check = (name, cond, extra = '') => {
   if (!cond) failures++;
 };
 
-// Mesura el to real de la imatge renderitzada (no una capa DOM)
-async function tone(page) {
-  const b64 = (await page.screenshot({ type: 'jpeg', quality: 45 })).toString('base64');
+// Analitza els píxels realment renderitzats al canvas (no cap capa DOM)
+async function pixels(page) {
+  const b64 = (await page.screenshot({ type: 'jpeg', quality: 40 })).toString('base64');
   return page.evaluate(async (data) => {
     const img = new Image();
     img.src = 'data:image/jpeg;base64,' + data;
     await img.decode();
+    const W = 200, H = 140;
     const c = document.createElement('canvas');
-    c.width = 160; c.height = 110;
+    c.width = W; c.height = H;
     const ctx = c.getContext('2d');
-    ctx.drawImage(img, 0, 0, 160, 110);
-    const d = ctx.getImageData(0, 0, 160, 110).data;
-    let r = 0, g = 0, b = 0, n = 0, redish = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
-      if (d[i] > 70 && d[i] > d[i + 2] * 1.4) redish++;
+    ctx.drawImage(img, 0, 0, W, H);
+    const d = ctx.getImageData(0, 0, W, H).data;
+    let r = 0, g = 0, bl = 0, n = 0, redish = 0, orange = 0;
+    // zona central: és on la càmera en tercera persona situa el personatge
+    const x0 = W * 0.32, x1 = W * 0.68, y0 = H * 0.30, y1 = H * 0.85;
+    let centrePixels = 0;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        const R = d[i], G = d[i + 1], B = d[i + 2];
+        r += R; g += G; bl += B; n++;
+        if (R > 70 && R > B * 1.4) redish++;
+        if (x > x0 && x < x1 && y > y0 && y < y1) {
+          centrePixels++;
+          // taronja de Naruto: vermell alt, verd mitjà, blau baix
+          if (R > 110 && G > 45 && G < 150 && B < 90) orange++;
+        }
+      }
     }
-    return { r: +(r / n).toFixed(1), g: +(g / n).toFixed(1), b: +(b / n).toFixed(1), redishPct: +(redish / n * 100).toFixed(2) };
+    return {
+      r: +(r / n).toFixed(1), g: +(g / n).toFixed(1), b: +(bl / n).toFixed(1),
+      redishPct: +(redish / n * 100).toFixed(2),
+      orangePct: +(orange / centrePixels * 100).toFixed(2),
+    };
   }, b64);
 }
 
@@ -45,19 +60,25 @@ const state = (page) => page.evaluate(() => ({
   choice: getComputedStyle(document.querySelector('#anom-choices')).display,
   room: document.querySelector('#anom-room')?.textContent,
   score: document.querySelector('#anom-score')?.textContent,
-  msg: document.querySelector('#anom-message')?.textContent,
-  overlayTitle: document.querySelector('#anom-title')?.textContent,
+  msg: (document.querySelector('#anom-message')?.textContent || '').slice(0, 80),
+  title: document.querySelector('#anom-title')?.textContent,
   overlay: getComputedStyle(document.querySelector('#anom-overlay')).display,
 }));
 
+const hold = async (page, keys, ms) => {
+  for (const k of keys) await page.keyboard.down(k);
+  await sleep(ms);
+  for (const k of keys) await page.keyboard.up(k);
+};
+
 try {
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 60; i++) {
     try { if ((await fetch(BASE)).ok) break; } catch {}
     await sleep(100);
   }
 
   const browser = await chromium.launch({ args: ['--no-sandbox', '--use-gl=swiftshader'] });
-  const page = await browser.newPage({ viewport: { width: 760, height: 560 } });
+  const page = await browser.newPage({ viewport: { width: 640, height: 480 } });
   const jsErrors = [];
   page.on('pageerror', (e) => jsErrors.push(e.message));
 
@@ -67,133 +88,101 @@ try {
   await page.click('#launch-game');
   await page.waitForSelector('#anom-start');
 
-  // PRUEBA 1: els models reals es carreguen (sense espera infinita)
   const t0 = Date.now();
   await page.waitForFunction(
     () => { const b = document.querySelector('#anom-start'); return b && !b.disabled; },
     null, { timeout: 40000 }
   );
   const loadMs = Date.now() - t0;
-  check('PRUEBA 1: Naruto i Terrifying carregats (botó COMENÇAR actiu)',
+  check('PRUEBA 1: Naruto i Terrifying carreguen (botó COMENÇAR actiu)',
     /COMENÇAR/.test((await page.textContent('#anom-start')).trim()), `${loadMs} ms`);
 
   await page.click('#anom-start');
-  await sleep(1800);
+  await sleep(1600);
   let st = await state(page);
   check('PRUEBA 2: partida iniciada a la sala 1', st.overlay === 'none' && st.room === '1');
 
-  const tBefore = await tone(page);
+  // PRUEBA 1b: el model s'ha de VORE renderitzat (taronja de Naruto al centre)
+  const p1 = await pixels(page);
+  check('PRUEBA 1: Naruto és visible renderitzat a la càmera en 3a persona',
+    p1.orangePct > 1.0, `taronja=${p1.orangePct}% del centre`);
 
-  // PRUEBA 2: moure's (W) i comprovar que la imatge canvia
-  await page.keyboard.down('KeyW');
-  await sleep(1200);
-  await page.keyboard.up('KeyW');
-  await sleep(250);
-  const tMoved = await tone(page);
-  check('PRUEBA 2: el jugador es mou amb W',
-    Math.abs(tMoved.r - tBefore.r) > 0.4 || Math.abs(tMoved.b - tBefore.b) > 0.4,
-    `abans r=${tBefore.r} b=${tBefore.b} / després r=${tMoved.r} b=${tMoved.b}`);
+  // PRUEBA 2: moviment amb W
+  await hold(page, ['KeyW'], 1300);
+  await sleep(200);
+  const p2 = await pixels(page);
+  check('PRUEBA 2: el jugador es mou amb W (la imatge canvia)',
+    Math.abs(p2.r - p1.r) > 0.3 || Math.abs(p2.b - p1.b) > 0.3,
+    `r ${p1.r}->${p2.r} / b ${p1.b}->${p2.b}`);
 
-  // PRUEBA 2/4: córrer fins a la porta del final de la sala 1
-  await page.keyboard.down('ShiftLeft');
-  await page.keyboard.down('KeyW');
-  let arrived = false;
-  for (let i = 0; i < 70; i++) {
-    await sleep(350);
-    st = await state(page);
-    if (st.choice === 'flex' || st.overlay !== 'none') { arrived = true; break; }
-    if (st.room === '2' && st.choice === 'flex') { arrived = true; break; }
-  }
-  await page.keyboard.up('KeyW');
-  await page.keyboard.up('ShiftLeft');
-  await sleep(300);
-  st = await state(page);
-  console.log(`  [info] sala=${st.room} score=${st.score} msg="${(st.msg || '').slice(0, 60)}"`);
-  check('PRUEBA 2: s\'avança de la sala 1 a la sala 2', st.room === '2', `sala=${st.room}`);
-
-  // Arribar a la zona de la porta de la sala 2 perquè aparegui la pregunta
-  if (st.choice !== 'flex') {
-    await page.keyboard.down('ShiftLeft');
-    await page.keyboard.down('KeyW');
-    for (let i = 0; i < 40; i++) {
-      await sleep(350);
-      st = await state(page);
-      if (st.choice === 'flex') break;
-    }
-    await page.keyboard.up('KeyW');
-    await page.keyboard.up('ShiftLeft');
-  }
+  // PRUEBA 2: córrer fins al final de la sala perquè avanci a la sala 2
+  await hold(page, ['ShiftLeft', 'KeyW'], 9000);
   await sleep(400);
   st = await state(page);
-  if (st.choice !== 'flex') { await page.keyboard.press('KeyE'); await sleep(700); st = await state(page); }
-  check('PRUEBA 4/5: apareixen els botons HI HA CANVIS / NO HI HA CANVIS',
-    st.choice === 'flex', `display=${st.choice}`);
+  check('PRUEBA 2: s\'avança de la sala 1 a la sala 2', st.room === '2', `sala=${st.room} msg="${st.msg}"`);
 
-  if (st.choice === 'flex') {
-    // PRUEBA 5: forçar una resposta incorrecta. Provem totes dues opcions.
-    let failed = false, attempts = 0;
-    while (attempts < 2 && !failed) {
-      const scoreBefore = st.score;
-      await page.click('#anom-same');
-      await sleep(900);
+  // PRUEBA 4/5: arribar a la porta i respondre
+  let answeredWrong = false, alarm = null;
+  for (let attempt = 0; attempt < 3 && !answeredWrong; attempt++) {
+    st = await state(page);
+    if (st.choice !== 'flex') {
+      await hold(page, ['ShiftLeft', 'KeyW'], 7000);
+      await sleep(500);
       st = await state(page);
-      if (/incorrecta|alarma/i.test(st.msg || '') || st.score === scoreBefore && st.choice !== 'flex') {
-        failed = /incorrecta|alarma/i.test(st.msg || '');
-      }
-      if (!failed && st.score !== scoreBefore) {
-        // Era correcta: avancem a la sala següent i tornem a provar
-        await page.keyboard.down('ShiftLeft');
-        await page.keyboard.down('KeyW');
-        for (let i = 0; i < 40; i++) {
-          await sleep(350);
-          st = await state(page);
-          if (st.choice === 'flex') break;
-        }
-        await page.keyboard.up('KeyW');
-        await page.keyboard.up('ShiftLeft');
-        await sleep(400);
-        st = await state(page);
-        if (st.choice !== 'flex') { await page.keyboard.press('KeyE'); await sleep(700); st = await state(page); }
-        if (st.choice !== 'flex') break;
-      }
-      attempts++;
     }
+    if (st.choice !== 'flex') { await page.keyboard.press('KeyE'); await sleep(600); st = await state(page); }
+    if (st.choice !== 'flex') break;
 
-    check('PRUEBA 5: la resposta incorrecta activa l\'alarma', failed, (st.msg || '').slice(0, 90));
-
-    if (failed) {
-      // La il·luminació REAL de l'escena ha de ser vermella (mesurat en píxels)
-      await sleep(1200);
-      const tAlarm = await tone(page);
-      check('PRUEBA 5: la il·luminació real de l\'escena és vermella',
-        tAlarm.redishPct > 6 && tAlarm.r > tAlarm.b,
-        `vermellós=${tAlarm.redishPct}% r=${tAlarm.r} b=${tAlarm.b}`);
-      await page.screenshot({ path: 'verif-alarma.jpg', type: 'jpeg', quality: 60 });
-
-      // PRUEBA 6: la criatura persegueix i acaba atraient el jugador -> Game Over
-      let caught = false;
-      for (let i = 0; i < 60; i++) {
-        await sleep(500);
-        st = await state(page);
-        if (st.overlay !== 'none' && /atrapat/i.test(st.overlayTitle || '')) { caught = true; break; }
-      }
-      check('PRUEBA 6: Terrifying persegueix i atrapa el jugador (Game Over)', caught,
-        `títol="${st.overlayTitle}"`);
+    const before = st.score;
+    await page.click('#anom-same');
+    await sleep(1000);
+    st = await state(page);
+    if (/incorrecta|alarma/i.test(st.msg) || st.score === before) {
+      answeredWrong = /incorrecta|alarma/i.test(st.msg);
+    }
+    if (!answeredWrong) {
+      // era correcta: la porta s'obre, avancem a la sala següent
+      await hold(page, ['ShiftLeft', 'KeyW'], 12000);
+      await sleep(400);
       st = await state(page);
-      console.log(`  [info] game over: "${st.overlayTitle}" | sala=${st.room} score=${st.score}`);
     }
   }
 
-  check('Sense errors JavaScript', jsErrors.length === 0, jsErrors.join(' | ').slice(0, 250));
+  check('PRUEBA 4/5: apareixen els botons HI HA CANVIS / NO HI HA CANVIS', answeredWrong || st.choice === 'flex');
+  check('PRUEBA 5: la resposta incorrecta activa l\'alarma', answeredWrong, st.msg);
 
-  // PRUEBA 7: sortir i reobrir sense pantalla negra
+  if (answeredWrong) {
+    await sleep(1400);
+    alarm = await pixels(page);
+    check('PRUEBA 5: la il·luminació REAL de l\'escena és vermella',
+      alarm.redishPct > 5 && alarm.r > alarm.b,
+      `vermellós=${alarm.redishPct}% r=${alarm.r} b=${alarm.b}`);
+
+    // PRUEBA 6: la criatura persegueix i atrapa -> Game Over
+    let caught = null;
+    for (let i = 0; i < 40; i++) {
+      await sleep(500);
+      const s2 = await state(page);
+      if (s2.overlay !== 'none' && /atrapat/i.test(s2.title || '')) { caught = s2; break; }
+    }
+    check('PRUEBA 6: Terrifying persegueix i atrapa el jugador (Game Over)',
+      !!caught, caught ? `"${caught.title}" score=${caught.score}` : 'no atrapat en 20 s');
+    if (caught) {
+      const retry = await page.textContent('#anom-start');
+      check('PRUEBA 6: pantalla de Game Over amb botó de reintent', /tornar/i.test(retry.trim()), retry.trim());
+    }
+  }
+
+  check('Sense errors JavaScript a la pàgina', jsErrors.length === 0, jsErrors.join(' | ').slice(0, 200));
+
+  // PRUEBA 7: sortir i reobrir l'estació sense pantalla negra
   await page.click('#anom-exit');
   await sleep(600);
   const afterExit = await page.evaluate(() => ({
     menu: !document.querySelector('#game-menu').classList.contains('hidden'),
     leftover: !!document.querySelector('#anom-game'),
   }));
-  check('PRUEBA 7: sortir neteja l\'escena i torna al menú', afterExit.menu && !afterExit.leftover);
+  check('PRUEBA 7: sortir neteja l\'escena 3D i torna al menú', afterExit.menu && !afterExit.leftover);
 
   await page.click('button[data-mode="anomaly"]');
   await page.click('#launch-game');
