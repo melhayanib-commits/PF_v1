@@ -254,4 +254,4 @@ El modo Món obert: Observació incluye Naruto y la criatura en `assets/characte
 
 
 ### Build Naruto + Terrifying
-The anomaly mode loads the optimized animated Naruto GLB (18 MiB, same embedded skeleton/70-channel animation as the 124 MiB texture-heavy variant) and the original Terrifying GLB from `assets/characters/`. Three.js and GLTFLoader use the same esm.sh module graph to avoid duplicate THREE constructors. For GitHub Pages, publish the contents of this project at the repository root.
+The anomaly mode loads the optimized animated Naruto GLB (18 MiB, same embedded skeleton/70-channel animation as the 124 MiB texture-heavy variant) and the original Terrifying GLB from `assets/characters/`. Three.js and GLTFLoader are served locally from `vendor/three/` (no CDN), so a single THREE module graph is shared and loading does not depend on third-party availability. For GitHub Pages, publish the contents of this project at the repository root.
