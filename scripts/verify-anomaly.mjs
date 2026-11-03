@@ -11,6 +11,7 @@ const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '1
   cwd: process.cwd(), stdio: 'ignore',
 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const CANVAS = '#anom-game canvas';
 
 let failures = 0;
 const check = (name, cond, extra = '') => {
@@ -19,8 +20,11 @@ const check = (name, cond, extra = '') => {
 };
 
 // Analitza els píxels realment renderitzats al canvas (no cap capa DOM)
-async function pixels(page) {
-  const b64 = (await page.screenshot({ type: 'jpeg', quality: 40 })).toString('base64');
+async function pixels(page, selector = null) {
+  const shot = selector
+    ? await page.locator(selector).screenshot({ type: 'jpeg', quality: 40 })
+    : await page.screenshot({ type: 'jpeg', quality: 40 });
+  const b64 = shot.toString('base64');
   return page.evaluate(async (data) => {
     const img = new Image();
     img.src = 'data:image/jpeg;base64,' + data;
@@ -114,7 +118,7 @@ try {
   check('PRUEBA 2: partida iniciada a la sala 1', st.overlay === 'none' && st.room === '1');
 
   // PRUEBA 1b: el model s'ha de VORE renderitzat (taronja de Naruto al centre)
-  const p1 = await pixels(page);
+  const p1 = await pixels(page, CANVAS);
   check('PRUEBA 1: Naruto és visible renderitzat a la càmera en 3a persona',
     p1.orangePct > 0.4, `taronja=${p1.orangePct}% de la imatge`);
 
@@ -129,7 +133,7 @@ try {
   // PRUEBA 2: moviment amb W
   await hold(page, ['KeyW'], 1300);
   await sleep(200);
-  const p2 = await pixels(page);
+  const p2 = await pixels(page, CANVAS);
   check('PRUEBA 2: el jugador es mou amb W (la imatge canvia)',
     Math.abs(p2.r - p1.r) > 0.3 || Math.abs(p2.b - p1.b) > 0.3,
     `r ${p1.r}->${p2.r} / b ${p1.b}->${p2.b}`);
@@ -169,7 +173,7 @@ try {
     if (st.choice !== 'flex') break;
 
     const before = st.score;
-    const basePx = await pixels(page);
+    basePx = await pixels(page, CANVAS);
     await tap(page, '#anom-same');
     await sleep(1000);
     st = await state(page);
@@ -189,7 +193,7 @@ try {
 
   if (answeredWrong) {
     await sleep(1400);
-    alarm = await pixels(page);
+    alarm = await pixels(page, CANVAS);
     const dRed = alarm.redishPct - (basePx?.redishPct ?? 0);
     const ratio = (alarm.r / Math.max(1, alarm.b)) / Math.max(0.01, (basePx?.r ?? 1) / Math.max(1, basePx?.b ?? 1));
     check('PRUEBA 5: la il·luminació REAL de l\'escena passa a vermella',
