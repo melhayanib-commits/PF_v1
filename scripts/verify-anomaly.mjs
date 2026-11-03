@@ -68,18 +68,32 @@ try {
   const after = await page.screenshot({ path: 'verif-mogut.png' });
   check('PRUEBA 2: el jugador es mou amb W (la imatge canvia)', !before.equals(after));
 
-  // PRUEBA 3: tornar enrere està bloquejat. Avancem i comprovem la sala.
-  // Interactua per obrir la decisió de la sala 2 (cal avançar primer)
-  await page.keyboard.down('KeyW');
-  await sleep(4200);
-  await page.keyboard.up('KeyW');
-  await sleep(600);
-  await page.keyboard.press('KeyE');
-  await sleep(700);
+  // PRUEBA 2/4: avançar corrent fins al final de la sala (la porta és a ~40 unitats)
+  const choiceState = () => page.evaluate(() => ({
+    display: getComputedStyle(document.querySelector('#anom-choices')).display,
+    room: document.querySelector('#anom-room').textContent,
+    msg: document.querySelector('#anom-message').textContent,
+  }));
 
-  const choiceOpen = await page.evaluate(
-    () => getComputedStyle(document.querySelector('#anom-choices')).display
-  );
+  let st0 = await choiceState();
+  await page.keyboard.down('ShiftLeft');
+  await page.keyboard.down('KeyW');
+  for (let i = 0; i < 60 && st0.display !== 'flex'; i++) {
+    await sleep(400);
+    st0 = await choiceState();
+    if (st0.display === 'flex') break;
+    if (i === 20) { await page.keyboard.press('KeyE'); }
+  }
+  await page.keyboard.up('KeyW');
+  await page.keyboard.up('ShiftLeft');
+  await sleep(400);
+  if (st0.display !== 'flex') {
+    await page.keyboard.press('KeyE');
+    await sleep(700);
+    st0 = await choiceState();
+  }
+  const choiceOpen = st0.display;
+  console.log('  [info] sala:', st0.room, '| missatge:', st0.msg?.slice(0, 70));
   check('PRUEBA 4/5: es mostra la pregunta HI HA CANVIS / NO HI HA CANVIS', choiceOpen === 'flex', `display=${choiceOpen}`);
 
   if (choiceOpen === 'flex') {
