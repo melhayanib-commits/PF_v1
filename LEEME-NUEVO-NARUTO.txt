@@ -1,0 +1,17 @@
+PANTALLA FOCUS — CAMBIO DE NARUTO
+
+CAMBIO REALIZADO:
+- El Naruto anterior ha sido retirado de los recursos activos del proyecto.
+- El juego carga ahora assets/characters/naruto_low_poly_rigged.glb, que corresponde al archivo adjunto low_poly_naruto_with_rig_and_running_animation.glb.
+- El modelo nuevo contiene 1 esqueleto, 1 clip de animación (188 canales), 6 materiales y 5 imágenes embebidas.
+- Se conserva sin cambios el archivo de la criatura que ya estaba en el proyecto: assets/characters/terrifying_hooded_horror_woman.glb.
+- Se ha actualizado la caché del service worker y se han añadido ambos GLB a la precarga.
+
+PUBLICACIÓN EN GITHUB PAGES:
+1. Descomprime este ZIP.
+2. Sube TODO el contenido de esta carpeta directamente a la raíz del repositorio que publica /PF/ (no subas una carpeta contenedora adicional).
+3. Espera a que termine la publicación de GitHub Pages.
+4. Cierra la pestaña anterior y vuelve a abrir la web. Si sigue apareciendo la versión antigua, borra los datos del sitio o prueba una pestaña privada.
+
+NOTA DE VERIFICACIÓN:
+Se han comprobado las rutas, la integridad de los GLB, el ZIP y la sintaxis JavaScript. No se ha podido ejecutar una partida real en un navegador en este entorno; por tanto, la apariencia final y el comportamiento en el dispositivo deben probarse tras publicar.

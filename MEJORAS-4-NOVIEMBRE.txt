@@ -1,0 +1,33 @@
+PANTALLA FOCUS — ACTUALITZACIÓ
+
+Canvis inclosos:
+- Interfície amb jerarquia visual més clara i targetes de jocs més llegibles.
+- Navegació principal conservada: Inici, Proves, Jocs interactius i Resultats.
+- FocusIA i les seccions de seguiment es conserven.
+- Textos principals i menú de jocs en català.
+- Estació: missatges temporals que desapareixen automàticament.
+- Estació: Naruto i Terrifying es carreguen des dels GLB originals inclosos a assets/characters.
+- Resposta incorrecta: alarma i il·luminació vermella; totes les portes de les sales queden tancades i amb bloqueig de pas per al jugador i la criatura.
+- En sortir de l'estació es conserva el contenidor original dels altres jocs per evitar que el motor 2D es quedi dibuixant en un element desconnectat.
+- Versió de memòria cau actualitzada per forçar la descàrrega dels fitxers nous.
+
+Publicació:
+- Mantén index.html a l'arrel del repositori.
+- Mantén assets/characters/ amb els dos fitxers GLB.
+- Mantén tests/ amb static-check.mjs.
+- Puja la resta dels fitxers a l'arrel del projecte.
+
+Verificacions realitzades:
+- node --check als scripts JavaScript principals.
+- tests/static-check.mjs.
+- Integritat del ZIP.
+
+No s'ha fet una prova de joc visual completa en un navegador real; cal comprovar la publicació final a GitHub Pages, especialment la càrrega dels GLB i el comportament en Safari iPhone.
+
+
+Correcció addicional del bloqueig de càrrega (versió v18):
+- Corregit un error en el tractament d'excepcions: la URL del GLB quedava fora de l'abast del catch i podia interrompre la promesa abans d'actualitzar el botó, deixant 'Carregant personatges…' indefinidament.
+- Ara cada model captura errors sense rebutjar la càrrega global i mostra el motiu concret.
+- Límit de 35 segons per model; després mostra un error recuperable.
+- El botó permet tornar a carregar els dos models.
+- La partida només comença quan Naruto i Terrifying s'han carregat correctament.

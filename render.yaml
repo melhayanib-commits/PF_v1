@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: pantalla-focus-api
+    runtime: node
+    plan: free
+    buildCommand: npm install --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: SERVE_FRONTEND
+        value: true
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:3000,http://127.0.0.1:3000
+      - key: ALLOW_GITHUB_PAGES
+        value: true

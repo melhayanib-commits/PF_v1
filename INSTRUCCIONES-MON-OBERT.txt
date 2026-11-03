@@ -1,0 +1,32 @@
+PANTALLA FOCUS — MÓN OBERT: OBSERVACIÓ
+
+CAMBIOS
+- El modo se muestra como “Món obert: Observació” en Jocs interactius.
+- Se conservan las otras secciones y los modos de juego existentes.
+- Incluye escenario de estación de metro, cinco salas, detalles variables, decisiones CAMBIOS / SIN CAMBIOS y una criatura perseguidora cuando se falla.
+- Incluye movimiento en tercera persona, controles WASD/flechas, ratón para cámara, correr, saltar, interactuar, joystick táctil, pausa y pantalla completa.
+- Three.js se descarga bajo demanda desde jsDelivr al iniciar este modo; hace falta conexión a internet.
+
+EJECUCIÓN LOCAL
+1. Instala Node.js.
+2. Abre una terminal en la carpeta del proyecto.
+3. Ejecuta: npm install
+4. Ejecuta: npm start
+5. Abre la dirección local que indique el servidor.
+
+COMPROBACIÓN DE CÓDIGO
+Ejecuta: node tests/static-check.mjs
+El chequeo estático se ha ejecutado correctamente en esta versión.
+
+ACTUALIZACIÓN — NARUTO Y CRIATURA ANIMADA
+- El personaje de Asta se ha retirado. Se incluye Naruto en assets/characters/naruto_uzumaki_running_animation.glb.
+- La criatura procedural se sustituye cuando carga el modelo riggeado terrifying_hooded_horror_woman.glb, con su animación de carrera.
+- Ambos GLB se cargan con GLTFLoader conservando sus materiales y texturas originales. El juego intenta reproducir sus animaciones incluidas.
+- La sala 1 es solo de observación: no aparece la pregunta y se memoriza como referencia. Al pasar a la sala 2 empieza la comparación con CAMBIOS / SIN CAMBIOS.
+- Los modelos se han comprobado en sus metadatos GLB: Naruto incluye 1 skin y 1 clip de animación; la criatura incluye 1 skin y 1 clip de animación. No se ha podido hacer una prueba visual completa en navegador desde este entorno.
+
+
+CORRECCIÓN DE CARGA DE PERSONAJES:
+- Se ha corregido el import del GLTFLoader a esm.sh para que el navegador pueda resolver la dependencia de Three.js.
+- Si el navegador sigue mostrando el personaje provisional, revisa la consola: el juego ahora registra el error y muestra un aviso.
+- IMPORTANTE: descargar este ZIP NO actualiza por sí solo la web publicada. Para que Naruto y la criatura aparezcan en GitHub Pages, hay que publicar/reemplazar los archivos del proyecto y comprobar que assets/characters/ contiene los dos GLB.

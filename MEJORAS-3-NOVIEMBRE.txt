@@ -1,0 +1,12 @@
+PANTALLA FOCUS — ACTUALITZACIÓ 3 NOVEMBRE 2026
+
+Canvis inclosos:
+- Reforç de càrrega dels GLB locals de Naruto i Terrifying. Ara es comprova la resposta HTTP abans d'iniciar el GLTFLoader, es mostra l'error real si el recurs falla i no es deixa el personatge provisional visible com si fos el model final.
+- El model de Naruto continua sent assets/characters/naruto_low_poly_rigged.glb (el fitxer proporcionat per l'usuari). Terrifying continua sent assets/characters/terrifying_hooded_horror_woman.glb (sense substituir-lo).
+- La resposta incorrecta de l'estació mostra la diferència real segons el tipus d'anomalia; si no hi havia canvis, ho explica explícitament.
+- Navegació simplificada: Inici, Proves, Jocs interactius i Resultats; Diari i Experiment continuen accessibles a Seguiment; FocusIA es manté.
+- Accés ràpid a proves, jocs, resultats i FocusIA des de l'inici.
+- Errors d'inicialització WebGL/Canvas mostren una pantalla d'error útil en lloc d'una zona negra buida.
+- Cache del service worker actualitzada a v15.
+
+Verificació feta: node --check als scripts principals i tests/static-check.mjs. No s'ha pogut completar una prova visual real de navegador en aquest entorn; per tant, cal comprovar el joc al desplegament publicat.

@@ -1,0 +1,10 @@
+{
+  "name": "Pantalla Focus",
+  "short_name": "Focus",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#07111b",
+  "theme_color": "#a6ff52",
+  "lang": "ca",
+  "description": "Entrenament educatiu d’hàbits digitals, jocs i pràctica cognitiva."
+}

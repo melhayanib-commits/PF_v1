@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111c">
+  <meta name="description" content="Pantalla Focus: hábitos digitales, concentración y estudio inteligente.">
+  <title>Pantalla Focus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#a6ff52"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"></head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-route="inicio" aria-label="Pantalla Focus, inicio">
+        <span class="brand-mark">PF<span>+</span></span>
+        <span><b>PANTALLA</b><small>FOCUS</small></span>
+      </a>
+      <div class="side-label">MENÚ PRINCIPAL</div>
+      <nav class="nav-list" aria-label="Navegación principal">
+        <button class="nav-link active" data-route="inicio"><span>⌂</span> Inici</button>
+        <button class="nav-link" data-route="pruebas"><span>◎</span> Proves</button>
+        <button class="nav-link" data-route="juegos"><span>◇</span> Jocs interactius</button>
+        <button class="nav-link" data-route="evolucion"><span>▥</span> Resultats</button>
+      </nav>
+      <div class="side-label side-label-secondary">EL TEU SEGUIMENT</div>
+      <nav class="nav-list nav-secondary" aria-label="Seguiment personal">
+        <button class="nav-link" data-route="diario"><span>▤</span> Diari personal</button>
+        <button class="nav-link" data-route="experimento"><span>◷</span> Experiment de 7 dies</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="ai-mini"><div class="ai-orb">✳</div><div><b>FocusIA</b><small>El teu tutor d’estudi</small></div><button data-route="focusia" aria-label="Abrir FocusIA">↗</button></div>
+        <div class="local-note"><span class="status-dot"></span> Dades desades en aquest dispositiu</div>
+        <button class="text-button" id="export-json">Exportar les meves dades ↗</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Abrir menú">☰</button>
+        <div class="breadcrumb"><span>ESPACIO PERSONAL</span><b id="page-name">Inici</b></div>
+        <div class="top-actions"><span class="live-pill"><i></i> ESPACIO ACTIVO</span><button class="icon-button" id="settings-button" aria-label="Preferències">⚙</button></div>
+      </header>
+
+      <section class="page active" id="page-inicio">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-line"></span> EL TEU CENTRE DE BENESTAR DIGITAL</div>
+            <h1>Entrena la teva atenció.<br><em>Comprèn el teu món digital.</em></h1>
+            <p>Observa els teus hàbits, explora la teva concentració i aprèn de manera intel·ligent. Un espai per conèixer-te millor, sense judicis ni fórmules màgiques.</p>
+            <div class="hero-actions"><button class="btn btn-primary" data-route="pruebas">Començar les meves proves <span>→</span></button><button class="btn btn-ghost" data-route="juegos">Explorar els jocs <span>↗</span></button></div>
+            <div class="hero-foot"><span class="tiny-check">✓</span> El teu progrés es desa en aquest dispositiu</div>
+          </div>
+          <div class="hero-art" aria-label="Ilustración abstracta tecnológica">
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
+            <div class="core"><div class="core-inner">PF</div></div>
+            <div class="float-tag tag-top"><span class="tag-dot"></span> FOCUS MODE <b>01</b></div>
+            <div class="float-tag tag-bottom"><span>✳</span> CONEIX ELS TEUS PATRONS</div>
+            <div class="art-grid"></div>
+          </div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">VISTA GENERAL</div><h2>El teu espai, d’un cop d’ull</h2></div><span class="muted small" id="today-label"></span></div>
+        <div class="metric-grid">
+          <article class="metric-card"><div class="metric-top"><span>TEMPS DE PANTALLA</span><span class="metric-icon">▣</span></div><strong id="home-screen">—</strong><small id="home-screen-note">Afegeix el teu primer registre</small><div class="metric-line"><i style="width:0%" id="screen-line"></i></div></article>
+          <article class="metric-card"><div class="metric-top"><span>SON REGISTRAT</span><span class="metric-icon blue">☾</span></div><strong id="home-sleep">—</strong><small>Últim registre disponible</small><div class="metric-line blue-line"><i id="sleep-line" style="width:0%"></i></div></article>
+          <article class="metric-card"><div class="metric-top"><span>CONCENTRACIÓ</span><span class="metric-icon purple">◎</span></div><strong id="home-focus">—</strong><small>Percepció personal · escala 1–5</small><div class="metric-line purple-line"><i id="focus-line" style="width:0%"></i></div></article>
+          <article class="metric-card"><div class="metric-top"><span>EXPERIMENTO</span><span class="metric-icon orange">◷</span></div><strong id="home-days">0/7</strong><small>Dies amb registre</small><div class="metric-line orange-line"><i id="days-line" style="width:0%"></i></div></article>
+        </div>
+        <div class="home-lower">
+          <article class="panel quick-panel"><div class="panel-head"><div><div class="eyebrow">COMENÇA PER AQUÍ</div><h3>Accesos rápidos</h3></div><span class="panel-symbol">↗</span></div>
+            <div class="quick-grid">
+              <button class="quick-action" data-route="pruebas"><span class="quick-icon green">◎</span><b>Fer una prova</b><small>Atenció i memòria, sense videojocs</small><span class="quick-arrow">→</span></button>
+              <button class="quick-action" data-route="juegos"><span class="quick-icon cyan">◇</span><b>Entrar als jocs</b><small>Reptes interactius i món 3D</small><span class="quick-arrow">→</span></button>
+              <button class="quick-action" data-route="evolucion"><span class="quick-icon violet">▥</span><b>Veure resultats</b><small>Consulta el teu progrés i historial</small><span class="quick-arrow">→</span></button>
+              <button class="quick-action" data-route="focusia"><span class="quick-icon amber">✳</span><b>Parlar amb FocusIA</b><small>Resol dubtes i estudia pas a pas</small><span class="quick-arrow">→</span></button>
+            </div>
+          </article>
+          <article class="panel activity-panel"><div class="panel-head"><div><div class="eyebrow">EL TEU RECORREGUT</div><h3>Activitat recent</h3></div><button class="link-button" data-route="evolucion">Veure historial →</button></div><div id="recent-activity" class="activity-list"><div class="empty-state"><span>⌁</span><b>La teva activitat apareixerà aquí</b><small>Registra un dia o completa una prova per començar.</small></div></div></article>
+        </div>
+        <footer class="footer-note">PANTALLA FOCUS <span>·</span> Una eina d’autoobservació i aprenentatge. No és un instrument de diagnòstic.</footer>
+      </section>
+
+      <section class="page" id="page-diario">
+        <div class="page-intro"><div class="eyebrow">OBSERVACIÓN PERSONAL</div><h1>El meu diari <em>digital</em></h1><p>Registra els teus hàbits de pantalla, descans i concentració. Les dades són manuals i privades en aquest navegador.</p></div>
+        <div class="two-col">
+          <form class="panel form-panel" id="diary-form">
+            <div class="panel-head"><div><div class="eyebrow">NUEVA ENTRADA</div><h3 id="diary-form-title">Com ha anat el teu dia?</h3></div><span class="form-date" id="form-date"></span></div>
+            <input type="hidden" id="edit-date">
+            <label class="field-label" for="diary-date">Fecha del registro</label><input class="input" type="date" id="diary-date" required>
+            <div class="form-section-title"><span>01</span> Ús de pantalles <small>Hores i minuts aproximats</small></div>
+            <div class="device-grid" id="device-fields"></div>
+            <div class="total-display"><span>TIEMPO TOTAL REGISTRADO</span><b id="diary-total">0 h 0 min</b></div>
+            <div class="form-section-title"><span>02</span> Sueño</div>
+            <div class="field-row"><div><label class="field-label" for="sleep-hours">Horas dormidas</label><input class="input" type="number" id="sleep-hours" min="0" max="24" step=".25" placeholder="Ej. 8"></div><div><label class="field-label" for="sleep-quality">Calidad percibida (1–5)</label><select class="input" id="sleep-quality"><option value="">Sin indicar</option><option value="1">1 · Muy baja</option><option value="2">2 · Baja</option><option value="3">3 · Media</option><option value="4">4 · Buena</option><option value="5">5 · Muy buena</option></select></div></div>
+            <label class="field-label" for="sleep-comment">Comentari sobre el son <span class="optional">Opcional</span></label><input class="input" id="sleep-comment" maxlength="240" placeholder="¿Te has despertado descansado?">
+            <div class="form-section-title"><span>03</span> Atenció i benestar</div>
+            <div class="field-row"><div><label class="field-label" for="concentration">Concentració percebuda (1–5)</label><select class="input" id="concentration"><option value="">Sin indicar</option><option value="1">1 · Muy baja</option><option value="2">2 · Baja</option><option value="3">3 · Media</option><option value="4">4 · Alta</option><option value="5">5 · Muy alta</option></select></div><div><label class="field-label" for="difficulty">Nivell per concentrar-te (1–5)</label><select class="input" id="difficulty"><option value="">Sin indicar</option><option value="1">1 · Ninguna</option><option value="2">2 · Leve</option><option value="3">3 · Moderada</option><option value="4">4 · Alta</option><option value="5">5 · Muy alta</option></select></div></div>
+            <div class="field-row"><div><label class="field-label" for="fatigue">Cansancio mental (1–5)</label><select class="input" id="fatigue"><option value="">Sin indicar</option><option value="1">1 · Ninguno</option><option value="2">2 · Leve</option><option value="3">3 · Moderado</option><option value="4">4 · Alto</option><option value="5">5 · Muy alto</option></select></div><div><label class="field-label" for="mood">Estat d’ànim</label><select class="input" id="mood"><option value="">Sin indicar</option><option>Muy bien</option><option>Bien</option><option>Normal</option><option>Regular</option><option>Mal</option></select></div></div>
+            <div class="field-row"><div><label class="field-label" for="exercise">Actividad física <span class="optional">Minutos</span></label><input class="input" type="number" id="exercise" min="0" max="1440" placeholder="Ej. 30"></div><div><label class="field-label" for="circumstances">Circunstancias <span class="optional">Opcional</span></label><input class="input" id="circumstances" maxlength="160" placeholder="Exámenes, viaje..."></div></div>
+            <label class="field-label" for="observations">Observaciones personales <span class="optional">Opcional</span></label><textarea class="input textarea" id="observations" maxlength="1000" placeholder="Anota algo que quieras recordar..."></textarea>
+            <div class="form-actions"><button type="button" class="btn btn-ghost" id="reset-diary">Limpiar</button><button class="btn btn-primary" type="submit" id="save-diary">Desar registre <span>→</span></button></div>
+            <p class="form-feedback" id="diary-feedback" role="status"></p>
+          </form>
+          <div class="stack-col"><article class="panel"><div class="panel-head"><div><div class="eyebrow">HISTORIAL</div><h3>Registros anteriores</h3></div><span class="count-pill" id="diary-count">0</span></div><div id="diary-history" class="history-list"><div class="empty-state"><span>▤</span><b>Encara no hi ha registres</b><small>El teu primer registre apareixerà aquí.</small></div></div></article>
+          <article class="info-card"><span class="info-icon">ⓘ</span><div><b>Una observació, no un judici</b><p>Les escales reflecteixen la teva percepció personal. No mesuren capacitats clíniques ni estableixen relacions de causa i efecte.</p></div></article></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-experimento">
+        <div class="page-intro"><div class="eyebrow">OBSERVACIÓ DE 7 DIES</div><h1>Experiment <em>personal</em></h1><p>Observa com varien els teus hàbits durant una setmana. No cal que canviïs res per començar: registra i compara.</p></div>
+        <div class="experiment-hero panel"><div><div class="eyebrow">EL TEU PROGRÉS</div><div class="experiment-number"><strong id="experiment-count">0</strong><span>/ 7 días</span></div><p id="experiment-message">Cada registre diari compta com una observació.</p></div><div class="progress-ring" id="progress-ring"><div><b id="ring-percent">0%</b><small>COMPLETADO</small></div></div></div>
+        <div class="section-heading"><div><div class="eyebrow">SEGUIMIENTO</div><h2>La teva setmana d’observació</h2></div><span class="muted small">Es compten dies únics amb diari</span></div>
+        <div class="week-grid" id="week-grid"></div>
+        <div class="two-col experiment-lower"><article class="panel"><div class="panel-head"><div><div class="eyebrow">RESUM</div><h3>El que mostren les teves dades</h3></div></div><div id="experiment-summary" class="summary-stats"><div class="empty-state"><span>⌁</span><b>Necessitem més observacions</b><small>Registra els teus dies per calcular mitjanes reals.</small></div></div></article><article class="panel"><div class="panel-head"><div><div class="eyebrow">REFLEXIÓ</div><h3>Observacions de la setmana</h3></div></div><div id="experiment-observations" class="observation-list"><p class="muted">Les observacions que escriguis al diari apareixeran aquí.</p></div></article></div><div class="panel experiment-challenges"><div class="panel-head"><div><div class="eyebrow">REPTE DIARI</div><h3>Set dies, set missions</h3></div><span class="small muted">Marca el repte quan l’hagis completat.</span></div><div id="experiment-challenge-grid" class="challenge-grid"></div></div>
+        <p class="disclaimer">Aquest seguiment personal és descriptiu. Set dies de dades no permeten demostrar causalitat ni generalitzar resultats.</p>
+      </section>
+
+      <section class="page" id="page-evolucion">
+        <div class="page-intro"><div class="eyebrow">DADES I PATRONS</div><h1>Els teus <em>resultats</em></h1><p>Consulta les tendències dels teus registres i l’historial d’activitats. Només es representen dades que has desat.</p></div>
+        <div class="chart-grid"><article class="panel chart-panel"><div class="panel-head"><div><div class="eyebrow">DIARIO</div><h3>Temps de pantalla</h3></div><span class="chart-unit">HORAS</span></div><canvas id="chart-screens" height="190"></canvas><div class="chart-foot" id="screen-chart-note">Encara no hi ha prou dades.</div></article><article class="panel chart-panel"><div class="panel-head"><div><div class="eyebrow">DESCANSO</div><h3>Hores de son</h3></div><span class="chart-unit">HORAS</span></div><canvas id="chart-sleep" height="190"></canvas><div class="chart-foot" id="sleep-chart-note">Encara no hi ha prou dades.</div></article><article class="panel chart-panel"><div class="panel-head"><div><div class="eyebrow">ATENCIÓ</div><h3>Concentració percebuda</h3></div><span class="chart-unit">ESCALA 1–5</span></div><canvas id="chart-focus" height="190"></canvas><div class="chart-foot" id="focus-chart-note">Encara no hi ha prou dades.</div></article><article class="panel chart-panel"><div class="panel-head"><div><div class="eyebrow">COMPARACIÓN</div><h3>Son i concentració</h3></div><span class="chart-unit">DOS VARIABLES</span></div><canvas id="chart-compare" height="190"></canvas><div class="chart-foot">Comparación visual; no implica relación causal.</div></article></div>
+        <div class="panel history-panel"><div class="panel-head"><div><div class="eyebrow">REGISTRE D’ACTIVITAT</div><h3>El teu historial</h3></div><div class="export-actions"><button class="btn btn-small btn-ghost" id="export-csv">Exportar CSV</button><button class="btn btn-small btn-ghost" id="export-all">Exportar JSON</button></div></div><div id="all-history" class="table-wrap"></div></div>
+      </section>
+
+      <section class="page" id="page-pruebas">
+        <div class="page-intro"><div class="eyebrow">ENTRENAMENT COGNITIU</div><h1>Proves <em>cognitives</em></h1><p>Quatre tasques breus d’atenció i memòria. Són exercicis orientatius, no proves clíniques ni diagnòstics.</p></div>
+        <div class="test-layout"><div class="test-selector" id="test-selector">
+          <button class="test-choice active" data-test="attention"><span class="test-number">01</span><span><b>Atenció</b><small>Detecta la lletra objectiu entre distractors</small></span><span>→</span></button>
+          <button class="test-choice" data-test="numbers"><span class="test-number">02</span><span><b>Memòria numèrica</b><small>Recorda una seqüència de números</small></span><span>→</span></button>
+          <button class="test-choice" data-test="words"><span class="test-number">03</span><span><b>Memòria de paraules</b><small>Recorda vuit paraules diferents</small></span><span>→</span></button>
+          <button class="test-choice" data-test="visual"><span class="test-number">04</span><span><b>Seqüència visual</b><small>Reprodueix l’ordre de les caselles</small></span><span>→</span></button>
+          <div class="test-history-mini"><b>Últims resultats</b><div id="test-mini-history" class="mini-history">Encara no hi ha resultats.</div></div>
+        </div><div class="panel test-stage" id="test-stage"><div class="test-welcome"><div class="test-big-icon">◎</div><div class="eyebrow">TRIA UNA ACTIVITAT</div><h2>Entrena la teva atenció</h2><p>Tria una de les quatre proves. Llegeix les instruccions i fes l’activitat al teu ritme.</p><button class="btn btn-primary" id="start-selected-test">Començar atenció <span>→</span></button></div></div></div>
+        <p class="disclaimer">El rendiment pot variar per la pràctica, el cansament, l’entorn i el dispositiu. Els resultats no són diagnòstics mèdics ni avaluacions clíniques validades.</p>
+      </section>
+
+      <section class="page" id="page-juegos">
+        <div class="page-intro"><div class="eyebrow">ESPAI INTERACTIU</div><h1>Jocs <em>interactius</em></h1><p>Tria un dels quatre jocs de memòria o entra a l’estació d’anomalies. Pots jugar directament o fer les proves normals sense videojocs.</p></div>
+        <div id="game-menu" class="game-menu panel"><div class="game-menu-art"><div class="game-cube"></div><div class="game-orbit"></div><div class="game-menu-label">NEON TRAINING ENVIRONMENT <span>● ONLINE LOCAL</span></div></div><div class="game-menu-content"><div class="eyebrow">JOCS I REPTES</div><h2>Tria el teu joc <em>Neon Lab</em></h2><p>Escull una activitat segons el que vulguis entrenar. Cada targeta t’explica l’objectiu abans de començar.</p><div class="mode-grid"><button class="mode-card selected" data-mode="free"><b>01</b><strong>Ciutat de l’Atenció</strong><small>Objectius i distractors</small></button><button class="mode-card" data-mode="attention"><b>02</b><strong>Volcà dels Números</strong><small>Seqüències de números</small></button><button class="mode-card" data-mode="sequence"><b>03</b><strong>Illes de Paraules</strong><small>Memòria verbal</small></button><button class="mode-card" data-mode="maze"><b>04</b><strong>Temple dels Patrons</strong><small>Seqüències visuals</small></button><button class="mode-card" data-mode="anomaly"><b>05</b><strong>Estació de les anomalies</strong><small>Observa les sales i detecta què ha canviat</small></button></div><div class="game-menu-actions"><label class="field-label">Nivell <select class="input" id="game-difficulty"><option value="1">Exploració</option><option value="2">Estàndard</option><option value="3">Desafiament</option></select></label><button class="btn btn-primary" id="launch-game">Començar <span>→</span></button></div><p class="small muted">Ordinador: WASD o fletxes. Mòbil: controls tàctils. Pots pausar i sortir quan vulguis.</p></div></div>
+        <div id="game-container" class="game-container hidden"><div id="game-canvas-wrap"></div></div>
+        <div class="panel game-records"><div class="panel-head"><div><div class="eyebrow">PROGRESO</div><h3>Historial de partides</h3></div></div><div id="game-history" class="history-list"><div class="empty-state"><span>◇</span><b>Encara no hi ha partides</b><small>Completa una sessió per desar els teus resultats.</small></div></div></div>
+      </section>
+
+      <section class="page" id="page-focusia">
+        <div class="page-intro"><div class="eyebrow">ASSISTENT D’ESTUDI</div><h1>Hola, soc <em>FocusIA</em></h1><p>El teu espai per comprendre conceptes, practicar i organitzar l’estudi. La connexió real requereix configurar el backend.</p></div>
+        <div class="ai-layout"><div class="panel chat-panel"><div class="chat-top"><div class="ai-avatar">✳</div><div><b>FocusIA <span class="online-dot"></span></b><small id="ai-connection">Comprovant connexió…</small></div><button class="link-button" id="new-chat">＋ Nova conversa</button></div><div class="chat-messages" id="chat-messages"><div class="assistant-message"><div class="message-avatar">✳</div><div class="message-bubble"><b>Hola! Soc FocusIA.</b><p>Puc ajudar-te a entendre temes, resoldre exercicis pas a pas, resumir apunts i preparar preguntes de pràctica. Què estàs estudiant?</p><small>Assistent d’estudi · Verifica els resultats importants</small></div></div></div><div id="attachment-preview" class="attachment-preview hidden"></div><form id="chat-form" class="chat-composer"><div class="composer-tools"><label class="attach-button" title="Adjuntar imatge">＋<input type="file" id="image-upload" accept="image/jpeg,image/png,image/webp" hidden></label><span>JPG, PNG o WEBP · Màx. 5 MB</span><select id="ai-language" aria-label="Idioma"><option value="ca" selected>CA</option><option value="es">ES</option><option value="en">EN</option></select></div><textarea id="chat-input" rows="2" maxlength="6000" placeholder="Escriu la teva pregunta… (Enter per enviar, Shift + Enter per fer una línia nova)"></textarea><div class="composer-bottom"><span id="chat-error" role="status"></span><button class="btn btn-primary" id="send-chat" type="submit">Enviar <span>↑</span></button></div></form></div>
+          <aside class="ai-tools"><article class="panel tool-panel"><div class="eyebrow">EINES D’ESTUDI</div><h3>Atajos inteligentes</h3><p>Escriu o adjunta els teus apunts i tria què necessites.</p><button class="tool-action" data-prompt="Resumeix aquests apunts amb les idees principals i els conceptes clau.">▤ <span><b>Crear un resum</b><small>Idees principals i conceptes clau</small></span>→</button><button class="tool-action" data-prompt="Converteix aquest contingut en un esquema jeràrquic clar.">⌘ <span><b>Fer un esquema</b><small>Organitza la informació</small></span>→</button><button class="tool-action" data-prompt="Crea 8 preguntes de pràctica de dificultat progressiva sobre aquest contingut i espera les meves respostes per corregir-les.">◎ <span><b>Practicar preguntes</b><small>Comprova el que has après</small></span>→</button><button class="tool-action" data-prompt="Explica’m aquest contingut pas a pas amb un exemple senzill.">✳ <span><b>Explica-m’ho fàcil</b><small>Una explicació pas a pas</small></span>→</button></article>
+          <article class="panel flashcard-panel"><div class="eyebrow">MEMORITZACIÓ ACTIVA</div><h3>Targetes d’estudi</h3><p>Crea targetes de pregunta i resposta que es desen en aquest dispositiu.</p><button class="btn btn-ghost btn-block" id="open-flashcards">Obrir les meves targetes →</button><div class="flashcard-count"><b id="flashcard-count">0</b><span>targetes desades</span></div></article></aside></div>
+        <p class="disclaimer">Les converses s’envien al backend que configuris. No hi introdueixis dades personals sensibles. L’API pot generar costos independents.</p>
+      </section>
+
+      <footer class="mobile-footer">PANTALLA FOCUS · DADES LOCALS EN AQUEST DISPOSITIU</footer>
+      <nav class="mobile-main-nav" aria-label="Navegació ràpida">
+        <button class="active" data-route="inicio"><span>⌂</span><small>Inici</small></button>
+        <button data-route="pruebas"><span>◎</span><small>Proves</small></button>
+        <button data-route="juegos"><span>◇</span><small>Jocs</small></button>
+        <button data-route="evolucion"><span>▥</span><small>Resultats</small></button>
+      </nav>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-backdrop"><div class="modal panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="panel-head"><div><div class="eyebrow">PANTALLA FOCUS</div><h3 id="modal-title">Preferències</h3></div><button class="icon-button" id="close-modal" aria-label="Tancar">✕</button></div><div id="modal-content"></div></div></div>
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  <script src="focusia-config.js"></script><script src="focusia-local.js"></script><script src="app.js"></script>
+  <script src="games-arcade.js"></script><script src="world3d.js"></script><script src="anomaly3d.js"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
+</body>
+</html>

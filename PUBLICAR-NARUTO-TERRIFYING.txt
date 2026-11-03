@@ -1,0 +1,18 @@
+PANTALLA FOCUS — BUILD DEFINITIVO NARUTO + TERRIFYING
+
+Este ZIP contiene el sitio directamente en la raíz del archivo. Al publicarlo, index.html, anomaly3d.js, sw.js y assets/ deben quedar en la raíz del repositorio de GitHub Pages (no dentro de una carpeta pf/).
+
+Modelos animados incluidos:
+- assets/characters/naruto_uzumaki_running_animation.glb: variante GLB de aproximadamente 18 MiB con esqueleto, animación Mixamo (70 canales) y materiales/texturas embebidos. Es la variante adecuada para publicar en GitHub Pages.
+- assets/characters/terrifying_hooded_horror_woman.glb: modelo de aproximadamente 5,5 MiB con esqueleto y animación de carrera.
+
+¿Por qué no se incluye el Naruto de 124 MiB en la carpeta del sitio? GitHub bloquea archivos individuales de más de 100 MiB en repositorios Git normales. La variante de 18 MiB conserva el mismo esqueleto y la misma animación (70 canales); la diferencia principal es la resolución/peso de las texturas.
+
+PUBLICAR EN GITHUB PAGES:
+1. Descomprime el ZIP.
+2. Sube/reemplaza el contenido de esta carpeta a la raíz del repositorio y confirma los cambios.
+3. Espera a que termine la publicación de GitHub Pages.
+4. Cierra la pestaña anterior y vuelve a abrir la web; si sigue la versión antigua, prueba en pestaña privada.
+5. La web necesita conexión a internet para cargar Three.js y GLTFLoader desde esm.sh.
+
+El modo 3D muestra la sala 1 como observación sin pregunta. Las decisiones comienzan en la sala 2.
