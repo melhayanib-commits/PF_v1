@@ -149,7 +149,7 @@ try {
   check('PRUEBA 2: s\'avança de la sala 1 a la sala 2', st.room === '2', `sala=${st.room} msg="${st.msg}"`);
 
   // PRUEBA 4/5: arribar a la porta i respondre
-  let answeredWrong = false, alarm = null;
+  let answeredWrong = false, alarm = null, basePx = null;
   for (let attempt = 0; attempt < 3 && !answeredWrong; attempt++) {
     st = await state(page);
     if (st.choice !== 'flex') {
@@ -169,6 +169,7 @@ try {
     if (st.choice !== 'flex') break;
 
     const before = st.score;
+    const basePx = await pixels(page);
     await tap(page, '#anom-same');
     await sleep(1000);
     st = await state(page);
@@ -189,9 +190,11 @@ try {
   if (answeredWrong) {
     await sleep(1400);
     alarm = await pixels(page);
-    check('PRUEBA 5: la il·luminació REAL de l\'escena és vermella',
-      alarm.redishPct > 5 && alarm.r > alarm.b,
-      `vermellós=${alarm.redishPct}% r=${alarm.r} b=${alarm.b}`);
+    const dRed = alarm.redishPct - (basePx?.redishPct ?? 0);
+    const ratio = (alarm.r / Math.max(1, alarm.b)) / Math.max(0.01, (basePx?.r ?? 1) / Math.max(1, basePx?.b ?? 1));
+    check('PRUEBA 5: la il·luminació REAL de l\'escena passa a vermella',
+      dRed > 3 && ratio > 1.12,
+      `vermellós ${basePx?.redishPct}%->${alarm.redishPct}% (+${dRed.toFixed(2)}) r/b x${ratio.toFixed(2)}`);
 
     // PRUEBA 6: la criatura persegueix i atrapa -> Game Over
     let caught = null;
