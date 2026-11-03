@@ -33,7 +33,10 @@ app.use(helmet({
       'img-src': ["'self'", 'data:', 'blob:'],
       'media-src': ["'self'", 'data:', 'blob:'],
       // Els models GLB es carreguen des del mateix origen.
-      'connect-src': ["'self'"],
+      // GLTFLoader fa servir ImageBitmapLoader per a les textures incrustades al GLB,
+      // i aquest loader les descarrega amb fetch() des d'una URL blob: temporal.
+      // Sense blob: aquí, les textures dels personatges quedaven bloquejades.
+      'connect-src': ["'self'", 'blob:', 'data:'],
       'style-src': ["'self'", 'https:', "'unsafe-inline'"],
       'font-src': ["'self'", 'https:', 'data:'],
       'object-src': ["'none'"],
