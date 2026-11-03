@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-const root = new URL('../', import.meta.url).pathname;
+const root = new URL('./', import.meta.url).pathname;
 const read = f => fs.readFileSync(root + f, 'utf8');
 for (const f of ['app.js','games-arcade.js','anomaly3d.js','world3d.js','focusia-local.js','server.mjs']) execFileSync(process.execPath,['--check',root+f]);
 const html=read('index.html'), games=read('games-arcade.js'), app=read('app.js'), server=read('server.mjs');
