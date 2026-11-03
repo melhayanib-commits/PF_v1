@@ -44,15 +44,33 @@ app.use(helmet({
     }
   }
 }));
-app.use(cors({
+// CORS només per a l'API. Els fitxers estàtics (app.js, mòduls de Three.js, GLB)
+// s'han de poder descarregar sempre: Chrome envia capçalera Origin a les peticions
+// de mòduls ES, i bloquejar-les deixava el joc en negre o penjat a «Carregant…».
+// Una petició del mateix host sempre és legítima.
+const sameHost = (req, origin) => {
+  try {
+    return new URL(origin).host === req.headers.host;
+  } catch {
+    return false;
+  }
+};
+
+const apiCors = (req, res, next) => cors({
   origin(origin, cb) {
-    if (!origin || allowed.includes(origin) || (allowGitHubPages && /^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin))) return cb(null, true);
+    if (!origin) return cb(null, true);
+    if (sameHost(req, origin) || allowed.includes(origin)
+      || (allowGitHubPages && /^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin))) {
+      return cb(null, true);
+    }
     return cb(new Error('Origen no permitido'));
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
   maxAge: 600
-}));
+})(req, res, next);
+
+app.use('/api', apiCors);
 app.use(express.json({ limit: '32kb' }));
 if (process.env.SERVE_FRONTEND === 'true') app.use(express.static(__dirname));
 
