@@ -33,7 +33,7 @@ async function pixels(page) {
     const d = ctx.getImageData(0, 0, W, H).data;
     let r = 0, g = 0, bl = 0, n = 0, redish = 0, orange = 0;
     // zona central: és on la càmera en tercera persona situa el personatge
-    const x0 = W * 0.32, x1 = W * 0.68, y0 = H * 0.30, y1 = H * 0.85;
+    const x0 = 0, x1 = W, y0 = H * 0.15, y1 = H;
     let centrePixels = 0;
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
@@ -86,7 +86,7 @@ try {
   }
 
   const browser = await chromium.launch({ args: ['--no-sandbox', '--use-gl=swiftshader'] });
-  const page = await browser.newPage({ viewport: { width: 480, height: 360 } });
+  const page = await browser.newPage({ viewport: { width: 320, height: 240 } });
   const jsErrors = [];
   page.on('pageerror', (e) => jsErrors.push(e.message));
 
