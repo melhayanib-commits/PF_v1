@@ -47,5 +47,5 @@ const target=new THREE.Vector3(player.position.x,player.position.y+(third?2:2.2)
 const ro=new ResizeObserver(()=>{if(!active)return;camera.aspect=mount.clientWidth/mount.clientHeight;camera.updateProjectionMatrix();renderer.setSize(mount.clientWidth,mount.clientHeight)});ro.observe(mount);cleanup.push(()=>ro.disconnect());loop();}
 function stop(){active=false;cancelAnimationFrame(raf);cleanup.forEach(f=>{try{f()}catch{}});cleanup=[];renderer?.dispose();scene=null;renderer=null}
 // Only intercept the dedicated open-world card. Three.js loads only when needed.
-const launch=$('#launch-game');if(launch)launch.addEventListener('click',async e=>{const selected=$('.mode-card.selected');if(selected?.dataset.mode!=='world')return;e.stopImmediatePropagation();e.preventDefault();try{if(!window.THREE){window.THREE=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js')}boot()}catch(err){alert('No s’ha pogut iniciar el món 3D: '+err.message)}} ,true);
+const launch=$('#launch-game');if(launch)launch.addEventListener('click',async e=>{const selected=$('.mode-card.selected');if(selected?.dataset.mode!=='world')return;e.stopImmediatePropagation();e.preventDefault();try{if(!window.THREE){window.THREE=await import('./vendor/three/three.module.min.js')}boot()}catch(err){alert('No s’ha pogut iniciar el món 3D: '+err.message)}} ,true);
 })();

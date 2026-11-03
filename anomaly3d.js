@@ -44,7 +44,7 @@ async function loadRiggedModel(target,assetPath,desiredHeight,kind){
  const url=new URL(assetPath,document.baseURI).href;
  try{
   if(!GLTFLoaderClass){
-   const mod=await import('https://esm.sh/three@0.170.0/examples/jsm/loaders/GLTFLoader.js');
+   const mod=await import('./vendor/three/GLTFLoader.js');
    GLTFLoaderClass=mod.GLTFLoader;
   }
   const loader=new GLTFLoaderClass();
@@ -160,5 +160,5 @@ function boot(){const menu=$('#game-menu'),container=$('#game-container');menu.c
  const target=new THREE.Vector3(player.position.x,player.position.y+1.55,player.position.z);const off=new THREE.Vector3(Math.sin(camYaw)*5.6,2.3+camPitch*3,Math.cos(camYaw)*5.6);camera.position.lerp(target.clone().add(off),.12);camera.lookAt(target);renderer.render(scene,camera)}loop();
 }
 // Capture the menu's launch event before the arcade handler, but leave every other mode unchanged.
-const launch=$('#launch-game');if(launch)launch.addEventListener('click',async e=>{if($('.mode-card.selected')?.dataset.mode!=='anomaly')return;e.preventDefault();e.stopImmediatePropagation();try{if(!window.THREE)window.THREE=await import('https://esm.sh/three@0.170.0');teardown();boot()}catch(err){console.error(err);alert('No s’ha pogut carregar el joc 3D. Comprova la connexió i torna-ho a provar.')}} ,true);
+const launch=$('#launch-game');if(launch)launch.addEventListener('click',async e=>{if($('.mode-card.selected')?.dataset.mode!=='anomaly')return;e.preventDefault();e.stopImmediatePropagation();try{if(!window.THREE)window.THREE=await import('./vendor/three/three.module.min.js');teardown();boot()}catch(err){console.error(err);alert('No s’ha pogut carregar el joc 3D. Comprova la connexió i torna-ho a provar.')}} ,true);
 })();
