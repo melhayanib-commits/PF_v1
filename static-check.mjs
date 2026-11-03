@@ -8,7 +8,7 @@ const html=read('index.html'), games=read('games-arcade.js'), app=read('app.js')
 for (const id of ['game-menu','game-container','launch-game','game-difficulty','game-history','page-juegos','page-focusia']) assert.equal((html.match(new RegExp(`id=["']${id}["']`,'g'))||[]).length,1,`ID ${id}`);
 for (const token of ['Temple dels Patrons','Volcà dels Números','Illes de Paraules','Ciutat de l’Atenció','AL REVÉS','pointerdown','Escape']) assert.ok(games.includes(token),`game token ${token}`);
 for (const token of ['/api/health','/api/focusia','OPENAI_API_KEY','AbortController','FocusLocal']) assert.ok(app.includes(token)||server.includes(token),`AI token ${token}`);
-assert.ok(read('sw.js').includes('pantalla-focus-v18-loader-retry'),'service worker version');
+assert.ok(read('sw.js').includes('pantalla-focus-v19-local-three'),'service worker version');
 assert.ok(!games.includes('three'),'games have no CDN dependency');
 const anomaly=read('anomaly3d.js');
 for (const token of ['HI HA CANVIS','NO HI HA CANVIS','monsterActive','requestFullscreen','pointerdown','showDecision']) assert.ok(anomaly.includes(token),`anomaly game token ${token}`);
@@ -27,8 +27,13 @@ assert.ok(anomaly.includes('anomalyExplanation'),'wrong answers explain the real
 assert.ok(anomaly.includes('target.visible=false'),'failed model loads do not silently show placeholder characters');
 assert.ok(html.includes('data-route="pruebas"') && html.includes('data-route="juegos"') && html.includes('data-route="evolucion"'),'main navigation includes tests, games and results');
 assert.ok(anomaly.includes('room===0&&first'),'the first room is an observation-only baseline');
-assert.ok(anomaly.includes('esm.sh/three@0.170.0/examples/jsm/loaders/GLTFLoader.js'),'GLTFLoader uses a browser-resolvable module URL');
-assert.ok(anomaly.includes("window.THREE=await import('https://esm.sh/three@0.170.0')"),'Three.js and GLTFLoader use the same CDN module graph');
+assert.ok(anomaly.includes("await import('./vendor/three/GLTFLoader.js')"),'GLTFLoader is served from the repository');
+assert.ok(anomaly.includes("window.THREE=await import('./vendor/three/three.module.min.js')"),'Three.js and GLTFLoader share one local module graph');
+assert.ok(!anomaly.includes('esm.sh')&&!anomaly.includes('cdn.jsdelivr'),'no third-party CDN module dependency');
+assert.ok(fs.existsSync(root+'vendor/three/three.module.min.js'),'Three.js is vendored locally');
+assert.ok(fs.existsSync(root+'vendor/three/GLTFLoader.js'),'GLTFLoader is vendored locally');
+assert.ok(anomaly.includes('modelsInScene()'),'the game only starts when both models are really in the scene');
+assert.ok(anomaly.includes('no conté cap malla visible'),'a model without meshes is reported as a failure');
 assert.ok(anomaly.includes('assets/characters/naruto_low_poly_rigged.glb'),'Naruto model path is configured');
 assert.ok(anomaly.includes('assets/characters/terrifying_hooded_horror_woman.glb'),'creature model path is configured');
 console.log('STATIC CHECK PASS');
