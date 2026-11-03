@@ -246,7 +246,7 @@ El endpoint `GET /api/health` informa `ok` y `configured`; `configured: false` s
 
 El menú de jocs incorpora el mode **Món obert: Observació**, un joc de tercera persona amb cinc sales connectades d'una estació de metro. Cal observar els cartells, els seients, els elements de les parets i la il·luminació, i respondre amb **CAMBIOS** o **SIN CAMBIOS**. Una resposta incorrecta activa una criatura perseguidora. Inclou controls WASD/fletxes, ratolí per girar la càmera, Shift per córrer, Espai per saltar, E/interactuar, joystick tàctil, pausa i pantalla completa. Three.js i GLTFLoader es carreguen sota demanda des de `vendor/three/`, dins del propi projecte: no cal cap CDN ni cap connexió externa per carregar la biblioteca.
 
-Per validar els fitxers JavaScript i els elements principals, executa `npm test` (o `node tests/static-check.mjs`).
+Per validar els fitxers JavaScript i els elements principals, executa `npm test` (o `node static-check.mjs`).
 
 
 ### Personajes 3D animados
