@@ -142,6 +142,44 @@ La informació de l’aplicació es desa a `localStorage` del navegador. Això s
 
 ## Proves de qualitat realitzades en aquesta entrega
 
+### Com reproduir-les
+
+```bash
+npm test                                  # revisió estàtica (static-check.mjs)
+node scripts/verify-anomaly.mjs           # proves funcionals 1-7 al navegador (local)
+node scripts/verify-live.mjs https://…    # verificació del desplegament real (CSP + models)
+```
+
+`verify-anomaly.mjs` aixeca un servidor local, obre Chromium i comprova el joc amb assercions reals
+(mesura de píxels del canvas renderitzat, no del DOM). `verify-live.mjs` comprova la capçalera CSP
+del servidor desplegat i que Naruto es vegi renderitzat amb les seves textures.
+
+### Resultat obtingut
+
+| Comprovació | Resultat |
+| --- | --- |
+| `npm test` (revisió estàtica) | ✅ PASS |
+| `verify-anomaly.mjs` (14 assercions) | ✅ 14/14 PASS |
+| `verify-live.mjs` (desplegament) | ✅ 9/9 PASS |
+| Revisió de dependències (OSV) | ✅ 78 paquets, 0 troballes altes/crítiques |
+
+### Càrrega dels personatges (el problema principal)
+
+El joc **no** depèn de cap temporitzador: espera que `GLTFLoader` acabi de debò i valida que els dos
+models tinguin malla, esquelet i animació abans d’activar **COMENÇAR**. Si un model falla, es mostra
+quin ha fallat i per quin motiu, en lloc de quedar-se a «Carregant personatges…» indefinidament.
+Temps mesurats: **~0,46 s en local** i **~1,4 s al desplegament**.
+
+S’han trobat i corregit **dos errors reals de producció** que no es veien en local:
+
+1. **CORS global** — el middleware `cors()` estava muntat per a tot el lloc i Chrome envia capçalera
+   `Origin` a les peticions de mòduls ES. El domini del desplegament no era a `ALLOWED_ORIGINS`, de
+   manera que `vendor/three/three.module.min.js` responia **400** i el motor 3D no arrencava (pantalla
+   negra o càrrega infinita). Ara el CORS s’aplica **només a `/api`** i el propi host sempre s’accepta.
+2. **CSP bloquejava les textures** — `connect-src 'self'` impedia que `GLTFLoader` descarregués les
+   textures incrustades al GLB via URL `blob:`, i els personatges quedaven sense textures.
+   Ara és `connect-src 'self' blob: data:`, amb una asserció a `static-check.mjs` que ho protegeix.
+
 S’ha fet una revisió estàtica del projecte original i s’han corregit els punts principals del flux de jocs:
 
 - el botó d’entrada dels jocs queda connectat a un únic gestor;
