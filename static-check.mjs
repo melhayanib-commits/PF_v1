@@ -15,6 +15,11 @@ assert.ok(html.includes('sw-register.js'),'external service worker registration 
 assert.ok(server.includes("'blob:'"),'CSP allows blob: images for the FocusIA attachment preview');
 assert.ok(server.includes("'script-src': [\"'self'\"]"),'CSP allows the app scripts served from the same origin');
 assert.ok(!/script-src':\s*\[[^\]]*unsafe-inline/.test(server),'CSP does not allow inline scripts');
+// CORS només a /api: muntar-lo globalment retornava 400 als mòduls ES (Three.js)
+// quan el navegador envia Origin, i deixava el joc en negre al desplegament.
+assert.ok(server.includes("app.use('/api', apiCors)"),'CORS is mounted on /api only');
+assert.ok(!/app\.use\(cors\(/.test(server),'CORS middleware is not mounted globally on static files');
+assert.ok(server.includes('sameHost(req, origin)'),'own-host origins are always accepted');
 assert.ok(!games.includes('three'),'games have no CDN dependency');
 const anomaly=read('anomaly3d.js');
 for (const token of ['HI HA CANVIS','NO HI HA CANVIS','monsterActive','requestFullscreen','pointerdown','showDecision']) assert.ok(anomaly.includes(token),`anomaly game token ${token}`);
