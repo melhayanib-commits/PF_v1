@@ -13,6 +13,11 @@ assert.ok(read('sw.js').includes('./sw-register.js'),'service worker caches the 
 assert.ok(!html.includes('navigator.serviceWorker.register'),'service worker registration is not inline (CSP-safe)');
 assert.ok(html.includes('sw-register.js'),'external service worker registration is referenced');
 assert.ok(server.includes("'blob:'"),'CSP allows blob: images for the FocusIA attachment preview');
+// GLTFLoader descarrega les textures incrustades al GLB amb fetch() sobre URL blob:.
+// Amb connect-src 'self' el navegador les bloquejava i els personatges sortien sense textures.
+const connectSrc = (server.match(/'connect-src':\s*\[[^\]]*\]/)||[''])[0];
+assert.ok(connectSrc.includes("'self'"),'connect-src allows same-origin assets');
+assert.ok(connectSrc.includes('blob:'),'connect-src allows blob: URLs used by GLTFLoader for embedded textures');
 assert.ok(server.includes("'script-src': [\"'self'\"]"),'CSP allows the app scripts served from the same origin');
 assert.ok(!/script-src':\s*\[[^\]]*unsafe-inline/.test(server),'CSP does not allow inline scripts');
 // CORS només a /api: muntar-lo globalment retornava 400 als mòduls ES (Three.js)
