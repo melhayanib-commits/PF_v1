@@ -20,7 +20,30 @@ const allowGitHubPages = process.env.ALLOW_GITHUB_PAGES === 'true';
 const client = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 app.disable('x-powered-by');
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      'default-src': ["'self'"],
+      // Els scripts s'inline? No: tot va en fitxers propis (sw-register.js, app.js...).
+      'script-src': ["'self'"],
+      'script-src-attr': ["'none'"],
+      // La previsualització del fitxer adjunt de FocusIA fa servir blob: URLs.
+      'img-src': ["'self'", 'data:', 'blob:'],
+      'media-src': ["'self'", 'data:', 'blob:'],
+      // Els models GLB es carreguen des del mateix origen.
+      'connect-src': ["'self'"],
+      'style-src': ["'self'", 'https:', "'unsafe-inline'"],
+      'font-src': ["'self'", 'https:', 'data:'],
+      'object-src': ["'none'"],
+      'base-uri': ["'self'"],
+      'form-action': ["'self'"],
+      'frame-ancestors': ["'self'"],
+      'worker-src': ["'self'", 'blob:']
+    }
+  }
+}));
 app.use(cors({
   origin(origin, cb) {
     if (!origin || allowed.includes(origin) || (allowGitHubPages && /^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin))) return cb(null, true);
