@@ -8,7 +8,13 @@ const html=read('index.html'), games=read('games-arcade.js'), app=read('app.js')
 for (const id of ['game-menu','game-container','launch-game','game-difficulty','game-history','page-juegos','page-focusia']) assert.equal((html.match(new RegExp(`id=["']${id}["']`,'g'))||[]).length,1,`ID ${id}`);
 for (const token of ['Temple dels Patrons','Volcà dels Números','Illes de Paraules','Ciutat de l’Atenció','AL REVÉS','pointerdown','Escape']) assert.ok(games.includes(token),`game token ${token}`);
 for (const token of ['/api/health','/api/focusia','OPENAI_API_KEY','AbortController','FocusLocal']) assert.ok(app.includes(token)||server.includes(token),`AI token ${token}`);
-assert.ok(read('sw.js').includes('pantalla-focus-v19-local-three'),'service worker version');
+assert.ok(read('sw.js').includes('pantalla-focus-v20-local-three'),'service worker version');
+assert.ok(read('sw.js').includes('./sw-register.js'),'service worker caches the external registration script');
+assert.ok(!html.includes('navigator.serviceWorker.register'),'service worker registration is not inline (CSP-safe)');
+assert.ok(html.includes('sw-register.js'),'external service worker registration is referenced');
+assert.ok(server.includes("'blob:'"),'CSP allows blob: images for the FocusIA attachment preview');
+assert.ok(server.includes("'script-src': [\"'self'\"]"),'CSP allows the app scripts served from the same origin');
+assert.ok(!/script-src':\s*\[[^\]]*unsafe-inline/.test(server),'CSP does not allow inline scripts');
 assert.ok(!games.includes('three'),'games have no CDN dependency');
 const anomaly=read('anomaly3d.js');
 for (const token of ['HI HA CANVIS','NO HI HA CANVIS','monsterActive','requestFullscreen','pointerdown','showDecision']) assert.ok(anomaly.includes(token),`anomaly game token ${token}`);
